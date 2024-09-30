@@ -3,6 +3,6 @@
 
 set -o errexit
 
-python manage.py collectstatic --noinput
+cd backend
 python manage.py migrate
 gunicorn GenAIRevolution.wsgi:application --bind 0.0.0.0:$PORT
