@@ -1,4 +1,5 @@
 from django.urls import path
+from django.http import JsonResponse
 from .views import (
     SustainabilityReportView,
     EnvironmentalImpactView,
@@ -9,7 +10,11 @@ from .views import (
     SampleDataView,
 )
 
+def api_root(request):
+    return JsonResponse({"message": "Welcome to the EcoPulse API"})
+
 urlpatterns = [
+    path('', api_root, name='api_root'),
     path('sustainability-report/', SustainabilityReportView.as_view(), name='sustainability_report'),
     path('environmental-impact/', EnvironmentalImpactView.as_view(), name='environmental_impact'),
     path('business-model/', BusinessModelView.as_view(), name='business_model'),
