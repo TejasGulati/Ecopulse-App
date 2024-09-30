@@ -2,17 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, AlertCircle, CheckCircle, MapPin, Briefcase, Phone } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function Register() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
-  const [location, setLocation] = useState('');
-  const [company, setCompany] = useState('');
-  const [phone, setPhone] = useState('');
-  const [message, setMessage] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    username: '',
+    location: '',
+    company: '',
+    phone: ''
+  });
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
   const { register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -22,18 +25,32 @@ function Register() {
     }
   }, [isAuthenticated, navigate]);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
+    // Clear the error for this field when the user starts typing
+    setErrors(prevErrors => ({
+      ...prevErrors,
+      [name]: ''
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage('');
+    setErrors({});
+    setSuccessMessage('');
     try {
-      const successMessage = await register(email, password, name, username, location, company, phone);
-      setMessage(successMessage);
+      await register(formData);
+      setSuccessMessage("Registration successful! Redirecting to login...");
       setTimeout(() => navigate('/login'), 2000);
     } catch (error) {
-      if (typeof error === 'object') {
-        setMessage(Object.entries(error).map(([key, value]) => `${key}: ${value}`).join(', '));
+      if (error.response && error.response.data) {
+        setErrors(error.response.data);
       } else {
-        setMessage(error.toString());
+        setErrors({ general: 'An unexpected error occurred. Please try again.' });
       }
     }
   };
@@ -41,6 +58,16 @@ function Register() {
   if (isAuthenticated) {
     return null;
   }
+
+  const inputFields = [
+    { name: 'name', label: 'Name', type: 'text', icon: User },
+    { name: 'username', label: 'Username', type: 'text', icon: User },
+    { name: 'email', label: 'Email address', type: 'email', icon: Mail },
+    { name: 'password', label: 'Password', type: 'password', icon: Lock },
+    { name: 'location', label: 'Location', type: 'text', icon: MapPin },
+    { name: 'company', label: 'Company', type: 'text', icon: Briefcase },
+    { name: 'phone', label: 'Phone', type: 'tel', icon: Phone }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-800 via-green-700 to-teal-800 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -67,139 +94,55 @@ function Register() {
       >
         <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg py-8 px-4 shadow-2xl sm:rounded-lg sm:px-10 border border-white border-opacity-20">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {message && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`rounded-md p-4 flex items-center ${message.includes('successful') ? 'bg-green-400 bg-opacity-20 text-green-100' : 'bg-red-400 bg-opacity-20 text-red-100'}`}
-              >
-                {message.includes('successful') ? <CheckCircle className="mr-2" /> : <AlertCircle className="mr-2" />}
-                {message}
-              </motion.div>
-            )}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-200">
-                Name
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  className="appearance-none block w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm bg-white bg-opacity-10 text-white"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            {inputFields.map((field) => (
+              <div key={field.name}>
+                <label htmlFor={field.name} className="block text-sm font-medium text-gray-200">
+                  {field.label}
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    id={field.name}
+                    name={field.name}
+                    type={field.type}
+                    required
+                    className={`appearance-none block w-full px-3 py-2 pl-10 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm bg-white bg-opacity-10 text-white ${
+                      errors[field.name] ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    value={formData[field.name]}
+                    onChange={handleChange}
+                  />
+                  <field.icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                </div>
+                <AnimatePresence>
+                  {errors[field.name] && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="mt-2 text-sm text-red-400"
+                    >
+                      {errors[field.name]}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
               </div>
-            </div>
+            ))}
 
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-200">
-                Username
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  required
-                  className="appearance-none block w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm bg-white bg-opacity-10 text-white"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-200">
-                Email address
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="appearance-none block w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm bg-white bg-opacity-10 text-white"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-200">
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"required
-                  className="appearance-none block w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm bg-white bg-opacity-10 text-white"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="location" className="block text-sm font-medium text-gray-200">
-                Location
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="location"
-                  name="location"
-                  type="text"
-                  className="appearance-none block w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm bg-white bg-opacity-10 text-white"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                />
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="company" className="block text-sm font-medium text-gray-200">
-                Company
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="company"
-                  name="company"
-                  type="text"
-                  className="appearance-none block w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm bg-white bg-opacity-10 text-white"
-                  value={company}
-                  onChange={(e) => setCompany(e.target.value)}
-                />
-                <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-200">
-                Phone
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  className="appearance-none block w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm bg-white bg-opacity-10 text-white"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              </div>
-            </div>
+            <AnimatePresence>
+              {(errors.general || successMessage) && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={`rounded-md p-4 flex items-center ${
+                    successMessage ? 'bg-green-400 bg-opacity-20 text-green-100' : 'bg-red-400 bg-opacity-20 text-red-100'
+                  }`}
+                >
+                  {successMessage ? <CheckCircle className="mr-2" /> : <AlertCircle className="mr-2" />}
+                  {successMessage || errors.general}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div>
               <motion.button
