@@ -10,7 +10,6 @@ echo "Setting up backend..."
 cd backend
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py collectstatic --noinput
 cd ..
 
 # Frontend setup
@@ -20,16 +19,15 @@ npm install
 npm run build
 cd ../..
 
-# Copy frontend build to Django static files
-echo "Copying frontend build to Django static files..."
-mkdir -p backend/staticfiles/
-cp -R frontend/ai-business-solutions/build/* backend/staticfiles/
+# Copy frontend build to Django static directory
+echo "Copying frontend build to Django static directory..."
+mkdir -p backend/static/
+cp -R frontend/ai-business-solutions/build/* backend/static/
 
-# Ensure the ai_models directory is in the correct location
-echo "Ensuring ai_models is in the correct location..."
-if [ ! -d "backend/ai_models" ]; then
-    echo "Moving ai_models to the correct location..."
-    mv backend/GenAIRevolution/ai_models backend/
-fi
+# Collect static files
+echo "Collecting static files..."
+cd backend
+python manage.py collectstatic --noinput
+cd ..
 
 echo "Build process completed successfully!"
