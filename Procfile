@@ -1,1 +1,0 @@
-web: gunicorn backend.GenAIRevolution.wsgi:application
