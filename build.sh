@@ -27,11 +27,13 @@ cp -R frontend/ai-business-solutions/build/* backend/staticfiles/
 
 # Ensure the .env file is in the correct location
 echo "Checking .env file..."
-if [ -f "frontend/ai-business-solutions/.env" ]; then
-    cp frontend/ai-business-solutions/.env backend/.env
+ENV_FILE="/Users/tejasgulati/Desktop/untitled folder 3/EcoPulse/.env"
+if [ -f "$ENV_FILE" ]; then
+    cp "$ENV_FILE" backend/.env
     echo ".env file copied to backend directory"
 else
-    echo "Warning: .env file not found in frontend/ai-business-solutions/"
+    echo "Error: .env file not found at $ENV_FILE"
+    exit 1
 fi
 
 echo "Build process completed successfully!"
