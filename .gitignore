@@ -10,7 +10,6 @@ __pycache__/
 *.py[cod]
 __pycache__/
 db.sqlite3
-staticfiles/
 media/
 *.pid
 *.sqlite3
