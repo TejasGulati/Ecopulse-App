@@ -48,11 +48,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'GenAIRevolution.urls'
 
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'frontend', 'ai-business-solutions', 'build')],
+        'DIRS': [os.path.join(BASE_DIR, 'static')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -96,13 +95,12 @@ USE_TZ = True
 
 PORT = int(os.environ.get('PORT', 8000))
 
-# Updated Static files settings
+# Static files settings
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-    BASE_DIR / 'frontend' / 'static',
 ]
 
 MEDIA_URL = '/media/'
@@ -137,7 +135,7 @@ CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
 
 AUTH_USER_MODEL = 'users.User'
 
-# Ensure logs directory exists
+# Logging configuration
 LOGS_DIR = os.path.join(BASE_DIR, 'logs')
 os.makedirs(LOGS_DIR, exist_ok=True)
 
