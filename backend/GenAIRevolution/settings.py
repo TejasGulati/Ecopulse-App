@@ -50,7 +50,7 @@ ROOT_URLCONF = 'GenAIRevolution.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'frontend', 'build')],
+        'DIRS': [os.path.join(BASE_DIR, 'frontend', 'ai-business-solutions', 'build')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -95,10 +95,12 @@ USE_TZ = True
 PORT = int(os.environ.get('PORT', 8000))
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Changed this line
-]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Only include STATICFILES_DIRS if the React build folder exists
+REACT_BUILD_STATIC = os.path.join(BASE_DIR, 'frontend', 'ai-business-solutions', 'build', 'static')
+if os.path.exists(REACT_BUILD_STATIC):
+    STATICFILES_DIRS = [REACT_BUILD_STATIC]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -188,7 +190,10 @@ if not DEBUG:
 # Configure Django app for Heroku
 django_heroku.settings(locals())
 
-# Debug prints
-print(f"BASE_DIR: {BASE_DIR}")
-print(f"STATICFILES_DIRS: {STATICFILES_DIRS}")
-print(f"STATIC_ROOT: {STATIC_ROOT}")
+# Add this at the end of your settings file
+if DEBUG:
+    import logging
+    logging.warning(
+        "React build folder doesn't exist. "
+        "Run 'npm run build' in the frontend directory to create it."
+    )

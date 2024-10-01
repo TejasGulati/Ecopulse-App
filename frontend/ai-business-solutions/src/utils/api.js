@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://ecopulse-app.onrender.com/',  // Update this to your Django backend URL
+  baseURL: '/api',  // Update this to your Django backend URL
 });
 
 api.interceptors.response.use(
