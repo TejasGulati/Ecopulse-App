@@ -12,8 +12,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('ai_models.urls')),
     path('api/users/', include('users.urls')),
-    path('', index_view, name='index'),
-    re_path(r'^(?!api/).*$', index_view),  # Match all non-api routes to the React app
+    re_path(r'^$', index_view, name='index'),
+    re_path(r'^(?!api/)(?!admin/)(?!static/)(?!media/).*$', index_view),  # Match all non-api routes to the React app
 ]
 
 # Serve media files in development

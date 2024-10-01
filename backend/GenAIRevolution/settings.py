@@ -36,6 +36,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -97,10 +98,9 @@ PORT = int(os.environ.get('PORT', 8000))
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Only include STATICFILES_DIRS if the React build folder exists
-REACT_BUILD_STATIC = os.path.join(BASE_DIR, 'frontend', 'ai-business-solutions', 'build', 'static')
-if os.path.exists(REACT_BUILD_STATIC):
-    STATICFILES_DIRS = [REACT_BUILD_STATIC]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend', 'ai-business-solutions', 'build', 'static'),
+]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -177,7 +177,7 @@ LOGGING = {
 
 # Security settings
 if not DEBUG:
-    SECURE_SSL_REDIRECT = not DEBUG 
+    SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
@@ -187,13 +187,11 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
+# Whitenoise settings
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Configure Django app for Heroku
 django_heroku.settings(locals())
 
-# Add this at the end of your settings file
-if DEBUG:
-    import logging
-    logging.warning(
-        "React build folder doesn't exist. "
-        "Run 'npm run build' in the frontend directory to create it."
-    )
+# Ensure STATIC_ROOT is set after django_heroku.settings(locals())
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
