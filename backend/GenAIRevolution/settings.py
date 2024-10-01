@@ -51,7 +51,7 @@ ROOT_URLCONF = 'GenAIRevolution.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'frontend', 'ai-business-solutions', 'build')],
+        'DIRS': [os.path.join(BASE_DIR, 'frontend', 'build')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -95,11 +95,13 @@ USE_TZ = True
 
 PORT = int(os.environ.get('PORT', 8000))
 
+# Updated Static files settings
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'frontend', 'ai-business-solutions', 'build', 'static'),
+    BASE_DIR / 'static',
+    BASE_DIR / 'frontend' / 'static',
 ]
 
 MEDIA_URL = '/media/'
