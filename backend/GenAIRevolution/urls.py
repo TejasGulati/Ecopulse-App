@@ -16,6 +16,8 @@ urlpatterns = [
     re_path(r'^(?!api/)(?!admin/)(?!static/)(?!media/).*$', index_view),  # Match all non-api routes to the React app
 ]
 
-# Serve media files in development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve static files
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# Serve media files
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
